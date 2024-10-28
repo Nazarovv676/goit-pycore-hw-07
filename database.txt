@@ -1,2 +1,2 @@
-{"name": "user", "phones": ["0980980988", "0980980988"]}
-{"name": "cooler", "phones": ["0981230983"]}
+{"name": "user", "phones": ["0980980988", "0980980988"], "birthday": "02.11.2024"}
+{"name": "cooler", "phones": ["0981230983"], "birthday": null}

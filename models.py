@@ -1,5 +1,6 @@
 from collections import UserString
 import json
+import re
 
 
 class Field(UserString):
@@ -32,10 +33,26 @@ class Phone(Field):
         super().__init__(value)
 
 
+class Birthday(Field):
+    """
+    Class for user birthday field.
+
+    Raises:
+        ValueError: If birthday is not in DD.MM.YYYY format
+    """
+
+    def __init__(self, birthday):
+        if not re.match(r"^\d{2}\.\d{2}\.\d{4}$", birthday):
+            raise ValueError("Birthday must be in DD.MM.YYYY format.")
+
+        super().__init__(birthday)
+
+
 class Record:
-    def __init__(self, name, phones):
+    def __init__(self, name, phones, birthday=None):
         self.name = Name(name)
         self.phones = [Phone(phone) for phone in phones]
+        self.birthday = Birthday(birthday) if birthday else None
 
     @staticmethod
     def from_json(json_str):
@@ -47,8 +64,9 @@ class Record:
                 and "phones" in user_dict
             ):
                 return Record(
-                    Name(user_dict["name"]),
-                    [Phone(phone) for phone in user_dict["phones"]],
+                    name=user_dict["name"],
+                    phones=user_dict["phones"],
+                    birthday=user_dict.get("birthday"),
                 )
             else:
                 raise ValueError("Parsed data is not a valid user dictionary.")
@@ -59,6 +77,7 @@ class Record:
         user_dict = {
             "name": str(self.name),
             "phones": [str(phone) for phone in self.phones],
+            "birthday": str(self.birthday) if self.birthday else None,
         }
         return json.dumps(user_dict)
 
@@ -75,16 +94,27 @@ class Record:
     def find_phone(self, phone):
         return phone in self.phones
 
+    def add_birthday(self, birthday):
+        self.birthday = Birthday(birthday)
+
     def __str__(self):
         phones_str = ", ".join(str(phone) for phone in self.phones)
-        return f"{self.name}: {phones_str}"
+        birthday_str = f", Birthday: {self.birthday}" if self.birthday else ""
+        return f"{self.name}: {phones_str}{birthday_str}"
 
     def __repr__(self):
         phones_str = ", ".join(str(phone) for phone in self.phones)
-        return f"Record({self.name}, [{phones_str}])"
+        birthday_str = f", {self.birthday}" if self.birthday else ""
+        return f"Record({self.name}, [{phones_str}]{birthday_str})"
 
     def __eq__(self, other):
-        return self.name == other.name and self.phones == other.phones
+        if not isinstance(other, Record):
+            return False
+        return (
+            self.name == other.name
+            and self.phones == other.phones
+            and self.birthday == other.birthday
+        )
 
     def __ne__(self, other):
         return not self == other

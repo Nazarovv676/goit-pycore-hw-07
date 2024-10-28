@@ -67,6 +67,33 @@ def parse(command: str) -> int:
         print(res)
         return 0
 
+    # Check for "add-birthday" command to add a birthday
+    elif match := re.search(
+        r"^add-birthday\s*(?P<name>\w+)?\s*(?P<birthday>\d{2}\.\d{2}\.\d{4})?$",
+        command,
+        re.IGNORECASE,
+    ):
+        name = match.group("name")
+        birthday = match.group("birthday")
+        res = command_handler.add_birthday(name, birthday)
+        print(res)
+        return 0
+
+    # Check for "show-birthday" command to get user birthday
+    elif match := re.search(
+        r"^show-birthday\s*(?P<name>\w+)?$", command, re.IGNORECASE
+    ):
+        name = match.group("name")
+        res = command_handler.get_birthday(name)
+        print(res)
+        return 0
+
+    # Check for "birthdays" command to get upcoming birthdays
+    elif re.search(r"^birthdays\s*$", command, re.IGNORECASE):
+        res = command_handler.get_upcoming_birthdays()
+        print(res)
+        return 0
+
     # Handle unknown commands
     else:
         print("🤖\tUnknown command. Please try one more time.")
